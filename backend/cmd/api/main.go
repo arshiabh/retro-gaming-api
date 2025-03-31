@@ -1,6 +1,7 @@
 package main
 
-
-func main(){
-	
+func main() {
+	app := application{}
+	max := app.mount()
+	app.run(max)
 }
