@@ -1,10 +1,17 @@
 package main
 
+import "log"
+
 func main() {
 	config := Load()
-	app := application{
-		cfg: *config,
+
+	//faster with pointer
+	app := &application{
+		config: *config,
 	}
-	max := app.mount()
-	app.run(max)
+
+	mux := app.mount()
+	if err := app.run(mux); err != nil {
+		log.Fatal(err)
+	}
 }
