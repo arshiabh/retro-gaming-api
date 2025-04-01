@@ -12,10 +12,6 @@ type PostgresUserStore struct {
 	db *sql.DB
 }
 
-func NewPostgresUserStore(db *sql.DB) *PostgresUserStore {
-	return &PostgresUserStore{
-		db: db,
-	}
-}
+func (s *PostgresUserStore) GetByUserID() {
 
-func (s *PostgresUserStore) GetByUserID() {}
+}

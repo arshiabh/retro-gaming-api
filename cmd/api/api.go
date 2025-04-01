@@ -4,13 +4,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/arshiabh/retro-gaming-api/internal/config"
+	"github.com/arshiabh/retro-gaming-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
 type application struct {
-	config config
+	config config.Config
+	store  *store.Storage
 }
 
 func (app *application) mount() http.Handler {
@@ -41,7 +44,7 @@ func (app *application) mount() http.Handler {
 
 func (app *application) run(mux http.Handler) error {
 	srv := &http.Server{
-		Addr:         app.config.addr,
+		Addr:         app.config.Addr,
 		Handler:      mux,
 		WriteTimeout: time.Second * 20,
 		ReadTimeout:  time.Second * 10,

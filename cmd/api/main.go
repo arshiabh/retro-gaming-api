@@ -1,13 +1,19 @@
 package main
 
-import "log"
+import (
+	"log"
+
+	"github.com/arshiabh/retro-gaming-api/internal/config"
+	"github.com/arshiabh/retro-gaming-api/internal/store"
+)
 
 func main() {
-	config := Load()
+	cfg := config.Load()
+	store := store.NewStorage(nil)
 
-	//faster with pointer
 	app := &application{
-		config: *config,
+		config: *cfg,
+		store:  store,
 	}
 
 	mux := app.mount()
