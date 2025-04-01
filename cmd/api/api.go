@@ -45,6 +45,7 @@ func (app *application) run(mux http.Handler) error {
 		Handler:      mux,
 		WriteTimeout: time.Second * 20,
 		ReadTimeout:  time.Second * 10,
+		IdleTimeout:  time.Minute,
 	}
 
 	return srv.ListenAndServe()
