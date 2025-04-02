@@ -12,7 +12,7 @@ import (
 )
 
 type application struct {
-	config config.Config
+	config *config.Config
 	store  *store.Storage
 }
 
@@ -30,6 +30,7 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Use(cors.Handler(cors.Options{
+		//check for only specific origin to avoid misconfig cors
 		AllowedOrigins:   []string{"https://*"},
 		AllowCredentials: true,
 	}))

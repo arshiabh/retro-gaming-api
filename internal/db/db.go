@@ -3,7 +3,10 @@ package db
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 func New(addr string, maxIdleConns, maxOpenConns int) (*sql.DB, error) {
@@ -22,6 +25,7 @@ func New(addr string, maxIdleConns, maxOpenConns int) (*sql.DB, error) {
 	if err := db.PingContext(ctx); err != nil {
 		return nil, err
 	}
+	log.Println("database connected succesfuly!")
 
 	return db, nil
 }
