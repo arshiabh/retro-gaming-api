@@ -1,6 +1,10 @@
 package main
 
-import "net/http"
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"net/http"
+)
 
 const (
 	csrfTokenLength   = 32 // 32 bytes = 256 bits
@@ -21,6 +25,9 @@ func csrfMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "CSRF token validation failed", http.StatusForbidden)
 			return
 		}
+
+		setCSRFToken(w, r)
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -38,9 +45,30 @@ func validateCSRFToken(r *http.Request) bool {
 }
 
 func setCSRFToken(w http.ResponseWriter, r *http.Request) {
-
+	token, err := generateCSRFToken()
+	if err != nil {
+		http.Error(w, "failed to generate token", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     csrfCookieName,
+		Value:    token,
+		MaxAge:   3600, // 1 hour
+		Path:     "/",
+		Secure:   true,  // HTTPS only
+		HttpOnly: false, // Allow JavaScript to read
+		SameSite: http.SameSiteStrictMode,
+	})
 }
 
 func isSafeMethod(method string) bool {
 	return method == "GET" || method == "HEAD" || method == "OPTION"
+}
+
+func generateCSRFToken() (string, error) {
+	token := make([]byte, csrfTokenLength)
+	if _, err := rand.Read(token); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(token), nil
 }
