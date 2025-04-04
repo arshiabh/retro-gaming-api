@@ -13,6 +13,12 @@ func (app *application) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) HandleCSRFTokenUser(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "test",
+		Value:    "hello world",
+		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
+	})
 	writeJSON(w, http.StatusOK, "message: token set")
 }
 
@@ -32,4 +38,9 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	writeJSON(w, http.StatusCreated, "message: user successfully created!")
+}
+
+func (app *application) HandleTest(w http.ResponseWriter, r *http.Request) {
+	cookies := r.Cookies()
+	writeJSON(w, http.StatusOK, cookies)
 }

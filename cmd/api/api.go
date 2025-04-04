@@ -24,7 +24,7 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// r.Use(csrfMiddleware)
+	r.Use(csrfMiddleware)
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
@@ -38,6 +38,7 @@ func (app *application) mount() http.Handler {
 
 	r.Route("/api/v1", func(r chi.Router) {
 
+		r.Get("/test" , app.HandleTest)
 		r.Post("/users", app.HandleCreateUser)
 		r.Get("/users", app.HandleCSRFTokenUser)
 
