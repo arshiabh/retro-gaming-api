@@ -45,7 +45,7 @@ func validateCSRFToken(r *http.Request) bool {
 	if requestToken == "" {
 		requestToken = r.FormValue(csrfFormFieldName)
 	}
-	fmt.Println(requestToken)
+	
 	return cookieToken.Value == requestToken
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserStore interface {
@@ -33,7 +35,9 @@ func (s *PostgresUserStore) Create(user *User) error {
 	INSERT INTO users (username, password_hash, is_admin , created_at, updated_at) 
 	VALUES ($1,$2,$3,$4,$5) 
 	`
+	hash, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()
-	return s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.IsAdmin, user.CreatedAt, user.UpdatedAt).Err()
+	return s.db.QueryRowContext(ctx, query, user.Username, string(hash), user.IsAdmin, user.CreatedAt, user.UpdatedAt).Err()
 }

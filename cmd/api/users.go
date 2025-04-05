@@ -13,12 +13,6 @@ func (app *application) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) HandleCSRFTokenUser(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "test",
-		Value:    "hello world",
-		Path:     "/",
-		SameSite: http.SameSiteLaxMode,
-	})
 	writeJSON(w, http.StatusOK, "message: token set")
 }
 
