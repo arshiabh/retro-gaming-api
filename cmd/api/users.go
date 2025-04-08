@@ -34,6 +34,10 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 	writeJSON(w, http.StatusCreated, "message: user successfully created!")
 }
 
+func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) {
+	
+}
+
 func (app *application) HandleTest(w http.ResponseWriter, r *http.Request) {
 	cookies := r.Cookies()
 	writeJSON(w, http.StatusOK, cookies)
