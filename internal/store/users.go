@@ -9,7 +9,7 @@ import (
 )
 
 type UserStore interface {
-	GetByUserID()
+	GetByUsername(string) (*User, error)
 	Create(*User) error
 }
 
@@ -26,8 +26,19 @@ type PostgresUserStore struct {
 	db *sql.DB
 }
 
-func (s *PostgresUserStore) GetByUserID() {
-
+func (s *PostgresUserStore) GetByUsername(username string) (*User, error) {
+	query := `
+	SELECT id, username FROM users 
+	WHERE username = ($1) 
+	`
+	user := &User{}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	row := s.db.QueryRowContext(ctx, query, username)
+	if err := row.Scan(&user.ID, &user.Username); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s *PostgresUserStore) Create(user *User) error {

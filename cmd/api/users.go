@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -35,7 +36,14 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) {
-	
+	username := r.FormValue("username")
+	// password := r.FormValue("password")
+	user, err := app.store.Users.GetByUsername(username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	writeJSON(w, http.StatusOK, fmt.Sprintf("message: %s successfully logged in!", user.Username))
 }
 
 func (app *application) HandleTest(w http.ResponseWriter, r *http.Request) {
