@@ -26,16 +26,19 @@ type PostgresUserStore struct {
 	db *sql.DB
 }
 
-func (s *PostgresUserStore) GetByUsername(username string) (*User, error) {
+func (s *PostgresUserStore) GetByUsername(username, password string) (*User, error) {
 	query := `
-	SELECT id, username FROM users 
+	SELECT id, username, password_hash FROM users 
 	WHERE username = ($1) 
 	`
 	user := &User{}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	row := s.db.QueryRowContext(ctx, query, username)
-	if err := row.Scan(&user.ID, &user.Username); err != nil {
+	if err := row.Scan(&user.ID, &user.Username, &user.Password); err != nil {
+		return nil, err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, err
 	}
 	return user, nil
