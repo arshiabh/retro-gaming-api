@@ -9,7 +9,7 @@ import (
 )
 
 type UserStore interface {
-	GetByUsername(string) (*User, error)
+	GetByUsername(string, string) (*User, error)
 	Create(*User) error
 }
 
@@ -32,7 +32,7 @@ func (s *PostgresUserStore) GetByUsername(username, password string) (*User, err
 	WHERE username = ($1) 
 	`
 	user := &User{}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()
 	row := s.db.QueryRowContext(ctx, query, username)
 	if err := row.Scan(&user.ID, &user.Username, &user.Password); err != nil {
