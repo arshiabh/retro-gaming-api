@@ -6,15 +6,12 @@ import (
 	"net/http"
 
 	"github.com/arshiabh/retro-gaming-api/internal/store"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 	var users []store.User
 	writeJSON(w, http.StatusOK, users)
-}
-
-func (app *application) HandleCSRFTokenUser(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, "message: token set")
 }
 
 func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -25,8 +22,12 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "invalid credentials", http.StatusBadRequest)
 		return
 	}
+
+	hash, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+
 	user.Username = username
-	user.Password = password
+	user.Password = string(hash)
+	
 	if err := app.store.Users.Create(user); err != nil {
 		log.Println(err)
 		http.Error(w, "failed to create user", http.StatusInternalServerError)
@@ -43,6 +44,11 @@ func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		http.Error(w, "error: invalid credentials", http.StatusBadRequest)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, fmt.Sprintf("message: %s successfully logged in!", user.Username))
 }
 
