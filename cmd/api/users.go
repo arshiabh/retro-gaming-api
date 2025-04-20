@@ -10,8 +10,8 @@ import (
 )
 
 type userPayload struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required,min=3"`
+	Password string `json:"password" validate:"required,min=3"`
 }
 
 func (app *application) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
@@ -22,9 +22,15 @@ func (app *application) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var payload userPayload
 	if err := readJSON(w, r, &payload); err != nil {
-		http.Error(w, "error: invalid credentials", http.StatusInternalServerError)
+		writeErrJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	//validate come form json
+	if err := validate.Struct(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	hash, _ := bcrypt.GenerateFromPassword([]byte(payload.Password), 14)
 
 	user := &store.User{
@@ -42,15 +48,24 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	user, err := app.store.Users.GetByUsername(username, password)
+	var payload userPayload
+	if err := readJSON(w, r, &payload); err != nil {
+		writeErrJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	//validate come form json
+	if err := validate.Struct(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := app.store.Users.GetByUsername(payload.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		http.Error(w, "error: invalid credentials", http.StatusBadRequest)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
+		writeErrJSON(w, http.StatusBadRequest, "invalid credentials")
 		return
 	}
 
