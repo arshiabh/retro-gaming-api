@@ -44,7 +44,7 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, fmt.Sprintf("id: %d, username: %s", user.ID, user.Username))
+	writeJSON(w, http.StatusCreated, map[string]any{"id": user.ID, "username": user.Username})
 }
 
 func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) {
