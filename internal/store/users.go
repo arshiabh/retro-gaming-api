@@ -7,7 +7,7 @@ import (
 )
 
 type UserStore interface {
-	GetByUsername(string) (*User, error)
+	Login(string) (*User, error)
 	Create(*User) error
 }
 
@@ -24,7 +24,7 @@ type PostgresUserStore struct {
 	db *sql.DB
 }
 
-func (s *PostgresUserStore) GetByUsername(username string) (*User, error) {
+func (s *PostgresUserStore) Login(username string) (*User, error) {
 	query := `
 	SELECT id, username, password_hash FROM users 
 	WHERE username = ($1) 
@@ -42,9 +42,10 @@ func (s *PostgresUserStore) GetByUsername(username string) (*User, error) {
 func (s *PostgresUserStore) Create(user *User) error {
 	query := `
 	INSERT INTO users (username, password_hash, is_admin , created_at, updated_at) 
-	VALUES ($1,$2,$3,$4,$5) 
+	VALUES ($1,$2,$3,$4,$5) RETURNING id, created_at
 	`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()
-	return s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.IsAdmin, user.CreatedAt, user.UpdatedAt).Err()
+	row := s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.IsAdmin, user.CreatedAt, user.UpdatedAt)
+	return row.Scan(&user.ID, &user.CreatedAt)
 }

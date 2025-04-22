@@ -40,9 +40,10 @@ func (app *application) mount() http.Handler {
 
 	r.Route("/api/v1", func(r chi.Router) {
 
+		r.Post("/login", app.HandleLoginUser)
+
 		r.Route("/users", func(r chi.Router) {
-			r.Post("/login", app.HandleLoginUser)
-			r.Post("/register", app.HandleCreateUser)
+			r.Post("/", app.HandleCreateUser)
 		})
 
 		r.Get("/test", app.HandleTest)

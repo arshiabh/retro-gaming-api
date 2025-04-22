@@ -44,7 +44,7 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, "message: user successfully created!")
+	writeJSON(w, http.StatusCreated, fmt.Sprintf("id: %d, username: %s", user.ID, user.Username))
 }
 
 func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +59,12 @@ func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err := app.store.Users.GetByUsername(payload.Username)
+	user, err := app.store.Users.Login(payload.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
 		writeErrJSON(w, http.StatusBadRequest, "invalid credentials")
 		return
