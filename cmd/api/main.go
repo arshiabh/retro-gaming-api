@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
 
+	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
 	"github.com/arshiabh/retro-gaming-api/internal/db"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -17,10 +19,12 @@ func main() {
 	}
 
 	store := store.NewStorage(db)
+	auth := auth.NewAuthentication(os.Getenv("secret_key"))
 
 	app := &application{
 		config: cfg,
 		store:  store,
+		auth:   auth,
 	}
 
 	mux := app.mount()

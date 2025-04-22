@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
 	"github.com/go-chi/chi/v5"
@@ -14,6 +15,7 @@ import (
 type application struct {
 	config *config.Config
 	store  *store.Storage
+	auth   auth.Authenticator
 }
 
 func (app *application) mount() http.Handler {

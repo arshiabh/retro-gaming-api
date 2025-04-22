@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// this struct implement authenticator that define auth so we can use it in app
 type JWTAuth struct {
 	secret string
 }
