@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -14,6 +17,29 @@ const (
 	csrfHeaderName    = "X-CSRF-Token"
 	csrfFormFieldName = "csrf_token"
 )
+
+func (app *application) JWTAuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			writeErrJSON(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 && parts[0] != "Bearer" {
+			writeErrJSON(w, http.StatusUnauthorized, "invalid authorization")
+			return
+		}
+		token := parts[1]
+		jwtToken, err := app.auth.ValidateToken(token)
+		if err != nil {
+			writeErrJSON(w, http.StatusUnauthorized, "invalid authorization")
+			return
+		}
+		claims := jwtToken.Claims.(jwt.MapClaims)
+		// userID := claims["sub"].(float64)
+	})
+}
 
 func csrfMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +71,7 @@ func validateCSRFToken(r *http.Request) bool {
 	if requestToken == "" {
 		requestToken = r.FormValue(csrfFormFieldName)
 	}
-	
+
 	return cookieToken.Value == requestToken
 }
 
