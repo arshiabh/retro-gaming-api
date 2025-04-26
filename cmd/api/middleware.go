@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+type contextKey string
 
 const (
 	csrfTokenLength   = 32 // 32 bytes = 256 bits
@@ -37,7 +40,10 @@ func (app *application) JWTAuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		claims := jwtToken.Claims.(jwt.MapClaims)
-		// userID := claims["sub"].(float64)
+		userID := claims["sub"].(float64)
+		var userIDKey contextKey = "userID"
+		ctx := context.WithValue(r.Context(), userIDKey, int(userID))
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
