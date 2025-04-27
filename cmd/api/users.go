@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -70,7 +69,13 @@ func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	writeJSON(w, http.StatusOK, fmt.Sprintf("message: %s successfully logged in!", user.Username))
+	token, err := app.auth.GenerateToken(int64(user.ID))
+	if err != nil {
+		writeErrJSON(w, http.StatusInternalServerError, "failed to generate token")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"token": token})
 }
 
 func (app *application) HandleTest(w http.ResponseWriter, r *http.Request) {

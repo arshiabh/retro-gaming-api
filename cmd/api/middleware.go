@@ -42,7 +42,7 @@ func (app *application) JWTAuthMiddleware(next http.Handler) http.Handler {
 		claims := jwtToken.Claims.(jwt.MapClaims)
 		userID := claims["sub"].(float64)
 		var userIDKey contextKey = "userID"
-		ctx := context.WithValue(r.Context(), userIDKey, int(userID))
+		ctx := context.WithValue(r.Context(), userIDKey, int64(userID))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

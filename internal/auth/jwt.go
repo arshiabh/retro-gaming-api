@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -18,7 +19,13 @@ func NewAuthentication(secret string) *JWTAuth {
 	}
 }
 
-func (a *JWTAuth) GenerateToken(claim jwt.Claims) (string, error) {
+func (a *JWTAuth) GenerateToken(userID int64) (string, error) {
+	claim := jwt.MapClaims{
+		"sub": userID,
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+		"nbf": time.Now().Unix(),
+		"iat": time.Now().Unix(),
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokenString, err := token.SignedString([]byte(a.secret))
 	if err != nil {
