@@ -1,11 +1,9 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/arshiabh/retro-gaming-api/internal/store"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type userPayload struct {
@@ -30,16 +28,9 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	hash, _ := bcrypt.GenerateFromPassword([]byte(payload.Password), 14)
-
-	user := &store.User{
-		Username: payload.Username,
-		Password: string(hash),
-	}
-
-	if err := app.store.Users.Create(user); err != nil {
-		log.Println(err)
-		http.Error(w, "failed to create user", http.StatusInternalServerError)
+	user, err := app.service.UserService.CreateUser(payload.Username, payload.Password)
+	if err != nil {
+		writeErrJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

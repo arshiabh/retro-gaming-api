@@ -22,8 +22,22 @@ func NewUserService(deps module.Dependencies) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(user *store.User) {
-	s.store.Users.Create(user)
+func (s *UserService) CreateUser(username, password string) (*store.User, error) {
+	hashpassword, err := utils.HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
+	user := &store.User{
+		Username: username,
+		Password: hashpassword,
+	}
+
+	user, err = s.store.Users.Create(user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s *UserService) LoginUser(username string, password string) (string, error) {

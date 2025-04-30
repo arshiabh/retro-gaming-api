@@ -8,7 +8,7 @@ import (
 
 type UserStore interface {
 	GetByUsername(string) (*User, error)
-	Create(*User) error
+	Create(*User) (*User, error)
 }
 
 type User struct {
@@ -39,7 +39,7 @@ func (s *PostgresUserStore) GetByUsername(username string) (*User, error) {
 	return user, nil
 }
 
-func (s *PostgresUserStore) Create(user *User) error {
+func (s *PostgresUserStore) Create(user *User) (*User, error) {
 	query := `
 	INSERT INTO users (username, password_hash, is_admin , created_at, updated_at) 
 	VALUES ($1,$2,$3,$4,$5) RETURNING id, created_at
@@ -47,5 +47,8 @@ func (s *PostgresUserStore) Create(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()
 	row := s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.IsAdmin, user.CreatedAt, user.UpdatedAt)
-	return row.Scan(&user.ID, &user.CreatedAt)
+	if err := row.Scan(&user.ID, &user.CreatedAt); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
