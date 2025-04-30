@@ -7,7 +7,6 @@ import (
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
 	"github.com/arshiabh/retro-gaming-api/internal/service"
-	"github.com/arshiabh/retro-gaming-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -16,7 +15,6 @@ import (
 type application struct {
 	config  *config.Config
 	service *service.Service
-	store   *store.Storage
 	auth    auth.Authenticator
 }
 

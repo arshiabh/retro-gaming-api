@@ -1,6 +1,8 @@
 package service
 
-import "github.com/arshiabh/retro-gaming-api/internal/module"
+import (
+	"github.com/arshiabh/retro-gaming-api/internal/module"
+)
 
 type Service struct {
 	UserService *UserService

@@ -7,7 +7,7 @@ import (
 )
 
 type UserStore interface {
-	Login(string) (*User, error)
+	GetByUsername(string) (*User, error)
 	Create(*User) error
 }
 
@@ -24,7 +24,7 @@ type PostgresUserStore struct {
 	db *sql.DB
 }
 
-func (s *PostgresUserStore) Login(username string) (*User, error) {
+func (s *PostgresUserStore) GetByUsername(username string) (*User, error) {
 	query := `
 	SELECT id, username, password_hash FROM users 
 	WHERE username = ($1) 

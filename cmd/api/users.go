@@ -57,21 +57,10 @@ func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
-	user, err := app.store.Users.Login(payload.Username)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
-		writeErrJSON(w, http.StatusBadRequest, "invalid credentials")
-		return
-	}
-
-	token, err := app.auth.GenerateToken(int64(user.ID))
+	token, err := app.service.UserService.LoginUser(payload.Username, payload.Password)
 	if err != nil {
-		writeErrJSON(w, http.StatusInternalServerError, "failed to generate token")
+		writeErrJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
