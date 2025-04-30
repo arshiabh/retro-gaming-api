@@ -6,6 +6,7 @@ import (
 
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
+	"github.com/arshiabh/retro-gaming-api/internal/service"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,9 +14,10 @@ import (
 )
 
 type application struct {
-	config *config.Config
-	store  *store.Storage
-	auth   auth.Authenticator
+	config  *config.Config
+	service *service.Service
+	store   *store.Storage
+	auth    auth.Authenticator
 }
 
 func (app *application) mount() http.Handler {
@@ -46,7 +48,7 @@ func (app *application) mount() http.Handler {
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", app.HandleCreateUser)
 		})
-		
+
 		r.Get("/test", app.HandleTest)
 
 	})

@@ -57,7 +57,7 @@ func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	
 	user, err := app.store.Users.Login(payload.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
