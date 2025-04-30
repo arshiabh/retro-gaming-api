@@ -49,9 +49,15 @@ func (app *application) HandleLoginUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	token, err := app.service.UserService.LoginUser(payload.Username, payload.Password)
+	user, err := app.service.UserService.LoginUser(payload.Username, payload.Password)
 	if err != nil {
 		writeErrJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	token, err := app.auth.GenerateToken(user.ID)
+	if err != nil {
+		writeErrJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

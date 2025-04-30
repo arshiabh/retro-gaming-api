@@ -28,7 +28,6 @@ func main() {
 	deps := module.Dependencies{
 		Store: store.NewStorage(db),
 		Kafka: kafka.NewClient([]string{"localhost:9999"}),
-		Auth:  auth,
 	}
 
 	service := service.NewService(deps)
