@@ -25,7 +25,7 @@ type PostgresGameStore struct {
 func (s *PostgresGameStore) Create(game *Game) (*Game, error) {
 	query := `
 	INSERT INTO games (name, description)
-	VALUES (1$,2$) RETURNING id
+	VALUES ($1,$2) RETURNING id
 	`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()

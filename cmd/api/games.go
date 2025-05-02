@@ -19,7 +19,9 @@ func (app *application) HandleCreateGame(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	game, err := app.service.GameService.CreateGame(payload.Name, payload.Description)
+	userID := r.Context().Value("userID").(int64)
+
+	game, err := app.service.GameService.CreateGame(payload.Name, payload.Description, userID)
 	if err != nil {
 		writeErrJSON(w, http.StatusInternalServerError, err.Error())
 		return

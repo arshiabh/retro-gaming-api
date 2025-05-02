@@ -9,6 +9,7 @@ import (
 type UserStore interface {
 	GetByUsername(string) (*User, error)
 	Create(*User) (*User, error)
+	GetUserById(int64) (*User, error)
 }
 
 type User struct {
@@ -48,6 +49,22 @@ func (s *PostgresUserStore) Create(user *User) (*User, error) {
 	defer cancel()
 	row := s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.IsAdmin, user.CreatedAt, user.UpdatedAt)
 	if err := row.Scan(&user.ID, &user.CreatedAt); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (s *PostgresUserStore) GetUserById(id int64) (*User, error) {
+	query := `
+	SELECT id, username, is_admin FROM users
+	WHERE id = ($1)
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
+	defer cancel()
+
+	user := &User{}
+	row := s.db.QueryRowContext(ctx, query, id)
+	if err := row.Scan(&user.ID, &user.Username, &user.IsAdmin); err != nil {
 		return nil, err
 	}
 	return user, nil

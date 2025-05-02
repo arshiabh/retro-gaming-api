@@ -18,7 +18,7 @@ func NewGameService(deps module.Dependencies) *GameService {
 	}
 }
 
-func (s *GameService) CreateGame(name, description string) (*store.Game, error) {
+func (s *GameService) CreateGame(name, description string, userID int64) (*store.Game, error) {
 	game := &store.Game{
 		Name:        name,
 		Description: description,
