@@ -6,10 +6,12 @@ import (
 
 type Service struct {
 	UserService *UserService
+	GameService *GameService
 }
 
 func NewService(deps module.Dependencies) *Service {
 	return &Service{
 		UserService: NewUserService(deps),
+		GameService: NewGameService(deps),
 	}
 }
