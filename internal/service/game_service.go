@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/module"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -27,7 +25,7 @@ func (s *GameService) CreateGame(name, description string, userID int64) (*store
 	}
 
 	if !user.IsAdmin {
-		return nil, fmt.Errorf("only admin can create game")
+		return nil, ErrForbidden
 	}
 
 	game := &store.Game{
