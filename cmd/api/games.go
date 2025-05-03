@@ -3,8 +3,8 @@ package main
 import "net/http"
 
 type gamePayload struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string `json:"name" validate:"required,min=3"`
+	Description string `json:"description" validate:"required,min=5"`
 }
 
 func (app *application) HandleCreateGame(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,8 @@ func (app *application) HandleCreateGame(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	userID := r.Context().Value("userID").(int64)
+	var userIDKey contextKey = "userID"
+	userID := r.Context().Value(userIDKey).(int64)
 
 	game, err := app.service.GameService.CreateGame(payload.Name, payload.Description, userID)
 	if err != nil {

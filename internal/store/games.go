@@ -32,7 +32,7 @@ func (s *PostgresGameStore) Create(game *Game) (*Game, error) {
 
 	row := s.db.QueryRowContext(ctx, query, game.Name, game.Description)
 
-	if err := row.Scan(game.ID); err != nil {
+	if err := row.Scan(&game.ID); err != nil {
 		return nil, err
 	}
 	return game, nil
