@@ -5,13 +5,15 @@ import (
 )
 
 type Service struct {
-	UserService *UserService
-	GameService *GameService
+	UserService  *UserService
+	GameService  *GameService
+	ScoreService *ScoreService
 }
 
 func NewService(deps module.Dependencies) *Service {
 	return &Service{
-		UserService: NewUserService(deps),
-		GameService: NewGameService(deps),
+		UserService:  NewUserService(deps),
+		GameService:  NewGameService(deps),
+		ScoreService: NewScoreService(deps),
 	}
 }

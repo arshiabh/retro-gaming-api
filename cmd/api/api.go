@@ -49,6 +49,7 @@ func (app *application) mount() http.Handler {
 		r.Group(func(r chi.Router) {
 			r.Use(app.JWTAuthMiddleware)
 			r.Post("/games", app.HandleCreateGame)
+			r.Post("/scores", app.HandleSetScore)
 		})
 
 		r.Get("/test", app.HandleTest)
