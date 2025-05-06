@@ -17,7 +17,7 @@ type Score struct {
 }
 
 type ScoreStore interface {
-	Set(int64, int64) (*Score, error)
+	Set(*Score) (*Score, error)
 }
 
 type PostgresScoreStore struct {
@@ -30,15 +30,15 @@ func NewPostgresScoreStore(db *sql.DB) *PostgresScoreStore {
 	}
 }
 
-func (s *PostgresScoreStore) Set(gameID, point int64) (*Score, error) {
+func (s *PostgresScoreStore) Set(score *Score) (*Score, error) {
 	query := `
-	INSERT INTO scores VALUES ()
+	INSERT INTO scores (user_id, game_id, score) 
+	VALUES ($1,$2,$3) RETURNING id
 	`
-	score := &Score{}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()
-	row := s.db.QueryRowContext(ctx, query, gameID, point)
-	if err := row.Scan(); err != nil {
+	row := s.db.QueryRowContext(ctx, query, score.UserID, score.GameID, score.Point)
+	if err := row.Scan(&score.ID); err != nil {
 		return nil, err
 	}
 	return score, nil

@@ -1,6 +1,10 @@
 package service
 
 import (
+	"context"
+	"fmt"
+	"log"
+
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/module"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -34,7 +38,26 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 	if err != nil {
 		return nil, err
 	}
+
+	if err := s.kafka.Produce("user-signup",
+		fmt.Appendf(nil, "%d", user.ID),
+		fmt.Appendf(nil, `{"event":"user-signup", "user_id":%d, "username":%v }`, user.ID, user.Username)); err != nil {
+		return nil, err
+	}
 	return user, nil
+}
+
+func (s *UserService) Readmessage() {
+	for {
+		reader := s.kafka.CreateReader("user-signup")
+		m, err := reader.ReadMessage(context.Background())
+		if err != nil {
+			log.Println("error reading message")
+			continue
+		}
+
+		log.Printf("message recevied: %s\n", m.Value)
+	}
 }
 
 func (s *UserService) LoginUser(username string, password string) (*store.User, error) {

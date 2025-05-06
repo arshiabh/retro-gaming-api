@@ -24,5 +24,5 @@ func (app *application) HandleSetScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]any{"id": score.ID, "game_id":score})
+	writeJSON(w, http.StatusCreated, map[string]any{"id": score.ID, "user_id": score.UserID, "game_id": score.GameID, "score": score.Point, "submitted_at": score.Submitted_at})
 }
