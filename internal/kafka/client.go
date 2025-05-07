@@ -22,7 +22,6 @@ func (k *Client) Produce(topic string, key, value []byte) error {
 		Brokers: k.Brokers,
 		Topic:   topic,
 	})
-
 	defer writer.Close()
 
 	return writer.WriteMessages(context.Background(), kafka.Message{
@@ -31,10 +30,11 @@ func (k *Client) Produce(topic string, key, value []byte) error {
 	})
 }
 
-func (k *Client) CreateReader(topic string) *kafka.Reader {
+func (k *Client) CreateReader(groupID, topic string) *kafka.Reader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: k.Brokers,
 		Topic:   topic,
+		GroupID: groupID,
 		//start reading new message
 		StartOffset: kafka.LastOffset,
 		MinBytes:    10e3, // 10KB

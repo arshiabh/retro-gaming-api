@@ -39,9 +39,9 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 		return nil, err
 	}
 
-	// if err := s.kafka.EnsureTopicExists("user-signup"); err != nil {
-	// 	return nil, err
-	// }
+	if err := s.kafka.EnsureTopicExists("user-signup"); err != nil {
+		return nil, err
+	}
 	if err := s.kafka.Produce("user-signup",
 		fmt.Appendf(nil, "%d", user.ID),
 		fmt.Appendf(nil, `{"event":"user-signup", "user_id":%d, "username":%v }`, user.ID, user.Username)); err != nil {
@@ -51,17 +51,14 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 }
 
 func (s *UserService) Readmessage() {
-	reader := s.kafka.CreateReader("user-signup")
+	reader := s.kafka.CreateReader("user-signup-consumer", "user-signup")
 	defer reader.Close()
 
 	for {
-
 		m, err := reader.ReadMessage(context.Background())
 		if err != nil {
 			log.Println("error reading message")
-
 		}
-
 		log.Printf("message recevied: %s\n", string(m.Value))
 	}
 
