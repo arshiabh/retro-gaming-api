@@ -43,7 +43,7 @@ func main() {
 	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"))
 
 	go func() {
-		if err := app.run(mux); err != nil {
+		if err := app.run(ctx, mux); err != nil {
 			log.Fatal(err)
 		}
 	}()

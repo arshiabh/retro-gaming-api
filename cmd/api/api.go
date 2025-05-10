@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"log"
 	"net/http"
 	"time"
 
@@ -60,7 +63,7 @@ func (app *application) mount() http.Handler {
 	return r
 }
 
-func (app *application) run(mux http.Handler) error {
+func (app *application) run(ctx context.Context, mux http.Handler) error {
 	srv := &http.Server{
 		Addr:         app.config.Addr,
 		Handler:      mux,
@@ -69,5 +72,30 @@ func (app *application) run(mux http.Handler) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	return srv.ListenAndServe()
+	serverErr := make(chan error, 1)
+
+	go func() {
+		log.Printf("starting http server on port %s\n", srv.Addr)
+		serverErr <- srv.ListenAndServe()
+	}()
+
+	select {
+	case <-ctx.Done():
+		log.Println("shutting down server")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+		defer cancel()
+
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			log.Println("error while shutting down server")
+			return err
+		}
+		return nil
+
+	case err := <-serverErr:
+		if !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
+		return nil
+	}
 }
