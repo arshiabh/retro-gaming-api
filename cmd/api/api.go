@@ -6,6 +6,7 @@ import (
 
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
+	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,6 +14,7 @@ import (
 )
 
 type application struct {
+	kafka   *kafka.KafkaService
 	config  *config.Config
 	service *service.Service
 	auth    auth.Authenticator

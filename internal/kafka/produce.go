@@ -7,7 +7,13 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func (k *Client) Produce(topic string, key, value []byte) error {
+type KafkaProducer interface {
+	Produce(string, []byte, []byte) error
+	EnsureTopicExists(string) error
+	CreateReader(string, string) *kafka.Reader
+}
+
+func (k *KafkaService) Produce(topic string, key, value []byte) error {
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: k.Brokers,
 		Topic:   topic,
@@ -21,7 +27,7 @@ func (k *Client) Produce(topic string, key, value []byte) error {
 }
 
 // cannot directly create topic in kafka we sure here topic is existed(creating it)
-func (k *Client) EnsureTopicExists(topic string) error {
+func (k *KafkaService) EnsureTopicExists(topic string) error {
 	conn, err := kafka.Dial("tcp", "localhost:9092")
 	if err != nil {
 		return err

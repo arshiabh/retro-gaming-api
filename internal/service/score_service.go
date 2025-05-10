@@ -4,19 +4,18 @@ import (
 	"time"
 
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
-	"github.com/arshiabh/retro-gaming-api/internal/module"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
 )
 
 type ScoreService struct {
-	kafka *kafka.Client
+	kafka kafka.KafkaProducer
 	store *store.Storage
 }
 
-func NewScoreService(deps module.Dependencies) *ScoreService {
+func NewScoreService(store *store.Storage, kafka kafka.KafkaProducer) *ScoreService {
 	return &ScoreService{
-		kafka: deps.Kafka,
-		store: deps.Store,
+		store: store,
+		kafka: kafka,
 	}
 }
 

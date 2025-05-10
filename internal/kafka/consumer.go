@@ -2,7 +2,7 @@ package kafka
 
 import "github.com/segmentio/kafka-go"
 
-func (k *Client) CreateReader(groupID, topic string) *kafka.Reader {
+func (k *KafkaService) CreateReader(groupID, topic string) *kafka.Reader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: k.Brokers,
 		Topic:   topic,

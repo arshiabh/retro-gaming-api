@@ -8,7 +8,6 @@ import (
 	"github.com/arshiabh/retro-gaming-api/internal/config"
 	"github.com/arshiabh/retro-gaming-api/internal/db"
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
-	"github.com/arshiabh/retro-gaming-api/internal/module"
 	"github.com/arshiabh/retro-gaming-api/internal/service"
 
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -23,15 +22,13 @@ func main() {
 	}
 
 	auth := auth.NewAuthentication(os.Getenv("secret_key"))
+	kafka := kafka.NewKafkaService([]string{"localhost:9092"})
+	store := store.NewStorage(db)
 
-	deps := module.Dependencies{
-		Store: store.NewStorage(db),
-		Kafka: kafka.NewClient([]string{"localhost:9092"}),
-	}
-
-	service := service.NewService(deps)
+	service := service.NewService(store, kafka)
 
 	app := &application{
+		kafka:   kafka,
 		config:  cfg,
 		service: service,
 		auth:    auth,

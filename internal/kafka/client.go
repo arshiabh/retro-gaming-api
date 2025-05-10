@@ -1,11 +1,11 @@
 package kafka
 
-type Client struct {
+type KafkaService struct {
 	Brokers []string
 }
 
-func NewClient(brokers []string) *Client {
-	return &Client{
+func NewKafkaService(brokers []string) *KafkaService {
+	return &KafkaService{
 		Brokers: brokers,
 	}
 }

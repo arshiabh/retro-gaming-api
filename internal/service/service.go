@@ -1,7 +1,8 @@
 package service
 
 import (
-	"github.com/arshiabh/retro-gaming-api/internal/module"
+	"github.com/arshiabh/retro-gaming-api/internal/kafka"
+	"github.com/arshiabh/retro-gaming-api/internal/store"
 )
 
 type Service struct {
@@ -10,10 +11,10 @@ type Service struct {
 	ScoreService *ScoreService
 }
 
-func NewService(deps module.Dependencies) *Service {
+func NewService(store *store.Storage, kafka kafka.KafkaProducer) *Service {
 	return &Service{
-		UserService:  NewUserService(deps),
-		GameService:  NewGameService(deps),
-		ScoreService: NewScoreService(deps),
+		UserService:  NewUserService(store, kafka),
+		GameService:  NewGameService(store, kafka),
+		ScoreService: NewScoreService(store, kafka),
 	}
 }
