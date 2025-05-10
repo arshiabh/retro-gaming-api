@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Addr string
-	DB   dbconfig
+	Addr      string
+	DB        dbconfig
+	KafkaAddr string
 }
 
 type dbconfig struct {
@@ -24,7 +25,8 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Addr: os.Getenv("addr"),
+		KafkaAddr: os.Getenv("kafkaAddr"),
+		Addr:      os.Getenv("addr"),
 		DB: dbconfig{
 			Addr:         os.Getenv("DBaddr"),
 			MaxOpenConns: 30,

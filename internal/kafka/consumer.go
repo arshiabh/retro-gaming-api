@@ -1,6 +1,11 @@
 package kafka
 
-import "github.com/segmentio/kafka-go"
+import (
+	"context"
+	"log"
+
+	"github.com/segmentio/kafka-go"
+)
 
 func (k *KafkaService) CreateReader(groupID, topic string) *kafka.Reader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
@@ -14,4 +19,23 @@ func (k *KafkaService) CreateReader(groupID, topic string) *kafka.Reader {
 	})
 
 	return reader
+}
+
+func (k *KafkaService) StartConsumer(ctx context.Context, reader *kafka.Reader) {
+	defer reader.Close()
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("shutting down kafka service")
+			return
+		default:
+			m, err := reader.ReadMessage(ctx)
+			if err != nil {
+				log.Println("error reading message")
+				log.Println(err)
+			}
+			log.Printf("message recevied: %s\n", string(m.Value))
+		}
+	}
 }

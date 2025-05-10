@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
@@ -22,7 +25,7 @@ func main() {
 	}
 
 	auth := auth.NewAuthentication(os.Getenv("secret_key"))
-	kafka := kafka.NewKafkaService([]string{"localhost:9092"})
+	kafka := kafka.NewKafkaService([]string{cfg.KafkaAddr})
 	store := store.NewStorage(db)
 
 	service := service.NewService(store, kafka)
@@ -36,8 +39,18 @@ func main() {
 
 	mux := app.mount()
 
-	if err := app.run(mux); err != nil {
-		log.Fatal(err)
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"))
 
+	go func() {
+		if err := app.run(mux); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	<-c
+	//stop kafka
+	cancel()
 }

@@ -1,9 +1,7 @@
 package service
 
 import (
-	"context"
 	"fmt"
-	"log"
 
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -47,25 +45,6 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 		return nil, err
 	}
 	return user, nil
-}
-
-func (s *UserService) Readmessage(ctx context.Context) {
-	reader := s.kafka.CreateReader("user-signup-consumer", "user-signup")
-	defer reader.Close()
-
-	for {
-		select {
-		case <-ctx.Done():
-			log.Println("kafka consumer shutting down!")
-			return
-		default:
-			m, err := reader.ReadMessage(context.Background())
-			if err != nil {
-				log.Println("error reading message")
-			}
-			log.Printf("message recevied: %s\n", string(m.Value))
-		}
-	}
 }
 
 func (s *UserService) LoginUser(username string, password string) (*store.User, error) {

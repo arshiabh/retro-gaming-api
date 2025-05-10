@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -34,8 +33,6 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		writeErrJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	go app.service.UserService.Readmessage(context.TODO())
 
 	writeJSON(w, http.StatusCreated, map[string]any{"id": user.ID, "username": user.Username})
 }
