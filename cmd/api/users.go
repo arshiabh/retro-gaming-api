@@ -35,7 +35,7 @@ func (app *application) HandleCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	app.service.UserService.Readmessage(context.TODO())
+	go app.service.UserService.Readmessage(context.TODO())
 
 	writeJSON(w, http.StatusCreated, map[string]any{"id": user.ID, "username": user.Username})
 }

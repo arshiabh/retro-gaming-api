@@ -38,7 +38,9 @@ func main() {
 	}
 
 	mux := app.mount()
+
 	if err := app.run(mux); err != nil {
 		log.Fatal(err)
 	}
+
 }

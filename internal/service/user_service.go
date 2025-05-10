@@ -51,25 +51,22 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 }
 
 func (s *UserService) Readmessage(ctx context.Context) {
-	go func() {
-		reader := s.kafka.CreateReader("user-signup-consumer", "user-signup")
-		defer reader.Close()
+	reader := s.kafka.CreateReader("user-signup-consumer", "user-signup")
+	defer reader.Close()
 
-		for {
-			select {
-			case <-ctx.Done():
-				log.Println("kafka consumer shutting down!")
-				return
-			default:
-				m, err := reader.ReadMessage(context.Background())
-				if err != nil {
-					log.Println("error reading message")
-				}
-				log.Printf("message recevied: %s\n", string(m.Value))
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("kafka consumer shutting down!")
+			return
+		default:
+			m, err := reader.ReadMessage(context.Background())
+			if err != nil {
+				log.Println("error reading message")
 			}
+			log.Printf("message recevied: %s\n", string(m.Value))
 		}
-
-	}()
+	}
 }
 
 func (s *UserService) LoginUser(username string, password string) (*store.User, error) {
