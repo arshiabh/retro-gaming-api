@@ -15,3 +15,11 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - "6381:6379"
+    restart: always
+    volumes:
+      - ./db-data/redis/:/data

@@ -75,10 +75,12 @@ func (app *application) run(ctx context.Context, mux http.Handler) error {
 	serverErr := make(chan error, 1)
 
 	go func() {
+		//go in background run server if we got error catch it with chan
 		log.Printf("starting http server on port %s\n", srv.Addr)
 		serverErr <- srv.ListenAndServe()
 	}()
 
+	//waiting for either of them to close, error or done
 	select {
 	case <-ctx.Done():
 		log.Println("shutting down server")
