@@ -1,9 +1,13 @@
 package cache
 
-import "github.com/redis/go-redis/v9"
+import (
+	"context"
+
+	"github.com/redis/go-redis/v9"
+)
 
 type UserStore interface {
-	Get(int64)
+	Get(context.Context, int64)
 }
 
 type RedisUserStore struct {
@@ -16,4 +20,6 @@ func NewUserStore(db *redis.Client) *RedisUserStore {
 	}
 }
 
-func (s *RedisUserStore) Get(userID int64)
+func (s *RedisUserStore) Get(ctx context.Context, userID int64) {
+
+}

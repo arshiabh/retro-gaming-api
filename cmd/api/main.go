@@ -12,6 +12,7 @@ import (
 	"github.com/arshiabh/retro-gaming-api/internal/db"
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/service"
+	"github.com/arshiabh/retro-gaming-api/internal/store/cache"
 
 	"github.com/arshiabh/retro-gaming-api/internal/store"
 )
@@ -27,8 +28,9 @@ func main() {
 	auth := auth.NewAuthentication(os.Getenv("secret_key"))
 	kafka := kafka.NewKafkaService([]string{cfg.KafkaAddr})
 	store := store.NewStorage(db)
+	rdb := cache.NewStorage(cache.NewRedisClient("localhost:6381"))
 
-	service := service.NewService(store, kafka)
+	service := service.NewService(store, kafka, rdb)
 
 	app := &application{
 		kafka:   kafka,

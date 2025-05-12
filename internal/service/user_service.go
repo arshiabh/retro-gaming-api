@@ -5,18 +5,21 @@ import (
 
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
+	"github.com/arshiabh/retro-gaming-api/internal/store/cache"
 	"github.com/arshiabh/retro-gaming-api/internal/utils"
 )
 
 type UserService struct {
 	store *store.Storage
 	kafka kafka.KafkaProducer
+	rdb   *cache.Storage
 }
 
-func NewUserService(store *store.Storage, kafka kafka.KafkaProducer) *UserService {
+func NewUserService(store *store.Storage, kafka kafka.KafkaProducer, rdb *cache.Storage) *UserService {
 	return &UserService{
 		store: store,
 		kafka: kafka,
+		rdb:   rdb,
 	}
 }
 
