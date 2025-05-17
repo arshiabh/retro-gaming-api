@@ -35,6 +35,7 @@ func (app *application) HandleSetScore(w http.ResponseWriter, r *http.Request) {
 func (app *application) HandleGetLeaderboard(w http.ResponseWriter, r *http.Request) {
 	gameIDstr := chi.URLParam(r, "gameID")
 	gameID, _ := strconv.Atoi(gameIDstr)
+
 	users, err := app.service.ScoreService.GetLeaderBoard(int64(gameID))
 	if err != nil {
 		writeErrJSON(w, http.StatusInternalServerError, err.Error())
@@ -43,4 +44,18 @@ func (app *application) HandleGetLeaderboard(w http.ResponseWriter, r *http.Requ
 
 	writeJSON(w, http.StatusOK, users)
 
+}
+
+func (app *application) HandleGetUserScore(w http.ResponseWriter, r *http.Request) {
+	userIDstr := chi.URLParam(r, "userID")
+	userID, _ := strconv.Atoi(userIDstr)
+
+	score, err := app.service.ScoreService.GetUserScore(int64(userID))
+	if err != nil {
+		writeErrJSON(w, http.StatusInternalServerError, err.Error())
+		app.errorLogger.Println(err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, score)
 }

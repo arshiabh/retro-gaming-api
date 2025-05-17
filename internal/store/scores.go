@@ -7,13 +7,13 @@ import (
 )
 
 type Score struct {
-	ID           int64     `json:"id"`
-	GameID       int64     `json:"game_id"`
-	UserID       int64     `json:"user_id"`
-	Point        int64     `json:"score"`
-	Submitted_at time.Time `json:"submitted_at"`
-	Created_at   time.Time `json:"created_at"`
-	Updated_at   time.Time `json:"updated_at"`
+	ID           int64     `json:"id,omitempty"`
+	GameID       int64     `json:"game_id,omitempty"`
+	UserID       int64     `json:"user_id,omitempty"`
+	Point        int64     `json:"score,omitempty"`
+	Submitted_at time.Time `json:"submitted_at,omitempty"`
+	Created_at   time.Time `json:"-"`
+	Updated_at   time.Time `json:"-"`
 }
 
 type LeaderBoard struct {
@@ -24,7 +24,8 @@ type LeaderBoard struct {
 
 type ScoreStore interface {
 	Set(*Score) (*Score, error)
-	GetTopTen(int64) ([]LeaderBoard, error)
+	GetTopTen(int64) ([]*LeaderBoard, error)
+	GetUserScore(int64) ([]*Score, error)
 }
 
 type PostgresScoreStore struct {
@@ -51,7 +52,7 @@ func (s *PostgresScoreStore) Set(score *Score) (*Score, error) {
 	return score, nil
 }
 
-func (s *PostgresScoreStore) GetTopTen(gameID int64) ([]LeaderBoard, error) {
+func (s *PostgresScoreStore) GetTopTen(gameID int64) ([]*LeaderBoard, error) {
 	query := `
 	select u.username, s.score, s.submitted_at from scores s 
 	inner join users u on u.id = s.user_id 
@@ -59,7 +60,7 @@ func (s *PostgresScoreStore) GetTopTen(gameID int64) ([]LeaderBoard, error) {
 	order by s.score
 	DESC limit 10 
 	`
-	var result []LeaderBoard
+	var result []*LeaderBoard
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
 	defer cancel()
@@ -71,7 +72,7 @@ func (s *PostgresScoreStore) GetTopTen(gameID int64) ([]LeaderBoard, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var user LeaderBoard
+		user := &LeaderBoard{}
 		if err := rows.Scan(&user.Username, &user.Score, &user.Submitted_at); err != nil {
 			return nil, err
 		}
@@ -79,4 +80,30 @@ func (s *PostgresScoreStore) GetTopTen(gameID int64) ([]LeaderBoard, error) {
 	}
 
 	return result, nil
+}
+
+func (s *PostgresScoreStore) GetUserScore(userID int64) ([]*Score, error) {
+	query := `
+	select game_id, score, submitted_at from scores 
+	where user_id = ($1)
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
+	defer cancel()
+
+	var scores []*Score
+
+	rows, err := s.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		score := &Score{}
+		rows.Scan(&score.GameID, &score.Point, &score.Submitted_at)
+
+		scores = append(scores, score)
+	}
+
+	return scores, nil
 }

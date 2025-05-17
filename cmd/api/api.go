@@ -51,6 +51,7 @@ func (app *application) mount() http.Handler {
 
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", app.HandleCreateUser)
+			r.Get("/{userID}/scores", app.HandleGetUserScore)
 		})
 
 		r.Group(func(r chi.Router) {
