@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type scorePayload struct {
@@ -31,8 +33,14 @@ func (app *application) HandleSetScore(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) HandleGetLeaderboard(w http.ResponseWriter, r *http.Request) {
-	gameIDstr := r.URL.Query().Get("gameID")
+	gameIDstr := chi.URLParam(r, "gameID")
 	gameID, _ := strconv.Atoi(gameIDstr)
-	app.service.ScoreService.GetLeaderBoard(int64(gameID))
-	//get top ten from service
+	users, err := app.service.ScoreService.GetLeaderBoard(int64(gameID))
+	if err != nil {
+		writeErrJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusOK, users)
+
 }

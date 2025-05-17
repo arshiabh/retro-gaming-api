@@ -38,7 +38,11 @@ func (s *ScoreService) SetScore(userID, gameID, point int64) (*store.Score, erro
 	return score, nil
 }
 
-func (s *ScoreService) GetLeaderBoard(gameID int64) ([]*store.Score, error) {
-	// s.store.Scores
-	return nil, nil
+func (s *ScoreService) GetLeaderBoard(gameID int64) ([]store.LeaderBoard, error) {
+	users, err := s.store.Scores.GetTopTen(gameID)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

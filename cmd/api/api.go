@@ -60,6 +60,7 @@ func (app *application) mount() http.Handler {
 		})
 
 		r.Get("/test", app.HandleTest)
+		r.Get("/leaderboard/{gameID}", app.HandleGetLeaderboard)
 
 	})
 	return r
