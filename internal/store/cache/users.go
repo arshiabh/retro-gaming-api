@@ -53,7 +53,7 @@ func (s *RedisUserStore) Set(ctx context.Context, user *store.User) error {
 		return err
 	}
 
-	if err := s.db.SetEx(ctx, cachekey, json, time.Minute*10).Err(); err != nil {
+	if err := s.db.SetEx(ctx, cachekey, json, time.Minute*5).Err(); err != nil {
 		return err
 	}
 

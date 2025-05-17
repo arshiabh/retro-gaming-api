@@ -32,11 +32,16 @@ func main() {
 
 	service := service.NewService(store, kafka, rdb)
 
+	errorLogger := log.New(os.Stdout, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLogger := log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	app := &application{
-		kafka:   kafka,
-		config:  cfg,
-		service: service,
-		auth:    auth,
+		kafka:       kafka,
+		config:      cfg,
+		service:     service,
+		auth:        auth,
+		errorLogger: errorLogger,
+		infoLogger:  infoLogger,
 	}
 
 	mux := app.mount()
@@ -46,7 +51,7 @@ func main() {
 
 	go func() {
 		if err := app.run(ctx, mux); err != nil {
-			log.Fatal(err)
+			app.errorLogger.Fatal(err)
 		}
 	}()
 

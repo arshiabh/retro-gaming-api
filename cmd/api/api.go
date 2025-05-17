@@ -17,10 +17,12 @@ import (
 )
 
 type application struct {
-	kafka   *kafka.KafkaService
-	config  *config.Config
-	service *service.Service
-	auth    auth.Authenticator
+	kafka       *kafka.KafkaService
+	config      *config.Config
+	service     *service.Service
+	auth        auth.Authenticator
+	errorLogger *log.Logger
+	infoLogger  *log.Logger
 }
 
 func (app *application) mount() http.Handler {
