@@ -18,6 +18,7 @@ type Score struct {
 
 type ScoreStore interface {
 	Set(*Score) (*Score, error)
+	GetTopTen(int64) ([]*Score, error)
 }
 
 type PostgresScoreStore struct {
@@ -42,4 +43,19 @@ func (s *PostgresScoreStore) Set(score *Score) (*Score, error) {
 		return nil, err
 	}
 	return score, nil
+}
+
+func (s *PostgresScoreStore) GetTopTen(gameID int64) ([]*Score, error) {
+	query := `
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*400)
+	defer cancel()
+
+	_, err := s.db.QueryContext(ctx, query, gameID)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

@@ -37,3 +37,8 @@ func (s *ScoreService) SetScore(userID, gameID, point int64) (*store.Score, erro
 	}
 	return score, nil
 }
+
+func (s *ScoreService) GetLeaderBoard(gameID int64) ([]*store.Score, error) {
+	// s.store.Scores
+	return nil, nil
+}

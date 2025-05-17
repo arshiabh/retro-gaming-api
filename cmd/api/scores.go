@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"strconv"
+)
 
 type scorePayload struct {
 	GameID int64 `json:"game_id" validate:"required"`
@@ -25,4 +28,11 @@ func (app *application) HandleSetScore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{"id": score.ID, "user_id": score.UserID, "game_id": score.GameID, "score": score.Point, "submitted_at": score.Submitted_at})
+}
+
+func (app *application) HandleGetLeaderboard(w http.ResponseWriter, r *http.Request) {
+	gameIDstr := r.URL.Query().Get("gameID")
+	gameID, _ := strconv.Atoi(gameIDstr)
+	app.service.ScoreService.GetLeaderBoard(int64(gameID))
+	//get top ten from service
 }

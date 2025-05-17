@@ -30,3 +30,4 @@ func (app *application) HandleCreateGame(w http.ResponseWriter, r *http.Request)
 
 	writeJSON(w, http.StatusCreated, map[string]any{"id": game.ID, "name": game.Name, "description": game.Description})
 }
+

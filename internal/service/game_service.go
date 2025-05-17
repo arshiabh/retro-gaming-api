@@ -39,3 +39,4 @@ func (s *GameService) CreateGame(name, description string, userID int64) (*store
 
 	return game, nil
 }
+
