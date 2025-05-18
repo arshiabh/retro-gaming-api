@@ -47,17 +47,20 @@ func main() {
 	mux := app.mount()
 
 	ctx, cancel := context.WithCancel(context.Background())
+
 	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"))
 
 	go func() {
-		if err := app.run(ctx, mux); err != nil {
-			app.errorLogger.Fatal(err)
-		}
+		// order is important in this way the app got time to shutdown gracefully
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+		<-c
+		//stop kafka
+		cancel()
 	}()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	<-c
-	//stop kafka
-	cancel()
+	if err := app.run(ctx, mux); err != nil {
+		app.errorLogger.Fatal(err)
+	}
+
 }
