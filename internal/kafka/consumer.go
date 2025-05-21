@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"log"
+	"sync"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -21,8 +22,9 @@ func (k *KafkaService) CreateReader(groupID, topic string) *kafka.Reader {
 	return reader
 }
 
-func (k *KafkaService) StartConsumer(ctx context.Context, reader *kafka.Reader) {
+func (k *KafkaService) StartConsumer(ctx context.Context, reader *kafka.Reader, wg *sync.WaitGroup) {
 	defer reader.Close()
+	defer wg.Done()
 
 	for {
 		select {

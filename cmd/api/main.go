@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
@@ -47,9 +48,9 @@ func main() {
 	mux := app.mount()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
 
-	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"))
-
+	// listen for shutdown
 	go func() {
 		// order is important in this way the app got time to shutdown gracefully
 		c := make(chan os.Signal, 1)
@@ -57,7 +58,11 @@ func main() {
 		<-c
 		//stop kafka
 		cancel()
+		wg.Wait()
 	}()
+
+	wg.Add(1)
+	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"), &wg)
 
 	if err := app.run(ctx, mux); err != nil {
 		app.errorLogger.Fatal(err)

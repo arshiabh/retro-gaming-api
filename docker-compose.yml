@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -22,4 +22,20 @@ services:
       - "6381:6379"
     restart: always
     volumes:
-      - ./db-data/redis/:/data
+      - redis_data:/data
+
+  postgres:
+    image: postgres:17
+    ports:
+      - "5555:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: retro-game
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  redis_data:
