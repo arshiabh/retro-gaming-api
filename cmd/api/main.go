@@ -50,6 +50,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
 
+	// start service before shutdown to avoid race condition
+	wg.Add(1)
+	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"), &wg)
+
 	// listen for shutdown
 	go func() {
 		// order is important in this way the app got time to shutdown gracefully
@@ -60,9 +64,6 @@ func main() {
 		cancel()
 		wg.Wait()
 	}()
-
-	wg.Add(1)
-	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"), &wg)
 
 	if err := app.run(ctx, mux); err != nil {
 		app.errorLogger.Fatal(err)
