@@ -41,7 +41,7 @@ func (app *application) mount() http.Handler {
 
 	r.Use(cors.Handler(cors.Options{
 		//check for only specific origin to avoid misconfig cors
-		AllowedOrigins:   []string{"https://*"},
+		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowCredentials: true,
 	}))
 
