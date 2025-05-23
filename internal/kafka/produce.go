@@ -28,7 +28,7 @@ func (k *KafkaService) Produce(topic string, key, value []byte) error {
 
 // cannot directly create topic in kafka we sure here topic is existed(creating it)
 func (k *KafkaService) EnsureTopicExists(topic string) error {
-	conn, err := kafka.Dial("tcp", "localhost:9092")
+	conn, err := kafka.Dial("tcp", "kafka:9092")
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,7 @@ func main() {
 	auth := auth.NewAuthentication(os.Getenv("secret_key"))
 	kafka := kafka.NewKafkaService([]string{cfg.KafkaAddr})
 	store := store.NewStorage(db)
-	rdb := cache.NewStorage(cache.NewRedisClient("localhost:6381"))
+	rdb := cache.NewStorage(cache.NewRedisClient("redis:6379"))
 
 	service := service.NewService(store, kafka, rdb)
 
