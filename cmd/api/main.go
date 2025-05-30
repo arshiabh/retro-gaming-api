@@ -12,6 +12,7 @@ import (
 	"github.com/arshiabh/retro-gaming-api/internal/config"
 	"github.com/arshiabh/retro-gaming-api/internal/db"
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
+	"github.com/arshiabh/retro-gaming-api/internal/ratelimiter"
 	"github.com/arshiabh/retro-gaming-api/internal/service"
 	"github.com/arshiabh/retro-gaming-api/internal/store/cache"
 
@@ -36,6 +37,8 @@ func main() {
 	errorLogger := log.New(os.Stdout, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger := log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	ratelimiter := ratelimiter.NewFixedWindowLimiter(cfg.RateLimit.RequestPerTime, cfg.RateLimit.TimeFrame)
+
 	app := &application{
 		kafka:       kafka,
 		config:      cfg,
@@ -43,6 +46,7 @@ func main() {
 		auth:        auth,
 		errorLogger: errorLogger,
 		infoLogger:  infoLogger,
+		ratelimiter: ratelimiter,
 	}
 
 	mux := app.mount()

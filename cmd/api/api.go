@@ -10,6 +10,7 @@ import (
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
+	"github.com/arshiabh/retro-gaming-api/internal/ratelimiter"
 	"github.com/arshiabh/retro-gaming-api/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -23,6 +24,7 @@ type application struct {
 	auth        auth.Authenticator
 	errorLogger *log.Logger
 	infoLogger  *log.Logger
+	ratelimiter ratelimiter.Limiter
 }
 
 func (app *application) mount() http.Handler {

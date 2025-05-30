@@ -21,6 +21,12 @@ const (
 	csrfFormFieldName = "csrf_token"
 )
 
+func (app *application) RatelimitMiddleware(nex http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.ratelimiter.Allow(r.RemoteAddr)
+	})
+}
+
 func (app *application) JWTAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
