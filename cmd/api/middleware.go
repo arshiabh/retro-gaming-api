@@ -21,9 +21,15 @@ const (
 	csrfFormFieldName = "csrf_token"
 )
 
-func (app *application) RatelimitMiddleware(nex http.Handler) http.Handler {
+func (app *application) RatelimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.ratelimiter.Allow(r.RemoteAddr)
+		if app.config.RateLimit.Enabled {
+			if allow, delay := app.ratelimiter.Allow(r.RemoteAddr); !allow {
+				writeErrJSON(w, http.StatusTooManyRequests, delay.String())
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
 	})
 }
 
