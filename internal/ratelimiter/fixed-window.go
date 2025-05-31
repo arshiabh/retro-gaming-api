@@ -49,9 +49,18 @@ func (rl *FixedWindowLimiter) Allow(ip string) (bool, time.Duration) {
 
 }
 
-func (rl *FixedWindowLimiter) resetCount(ip string) {
-	time.Sleep(rl.window)
-	rl.Lock()
-	delete(rl.clients, ip)
-	rl.Unlock()
+func (rl *FixedWindowLimiter) StartCleanup() {
+	go func() {
+		ticker := time.NewTicker(time.Minute * 1)
+		for range ticker.C {
+			rl.Lock()
+			now := time.Now()
+			for ip, client := range rl.clients {
+				if now.Sub(client.firstSeen) > rl.window {
+					delete(rl.clients, ip)
+				}
+			}
+			rl.Unlock()
+		}
+	}()
 }

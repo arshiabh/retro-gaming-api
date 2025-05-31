@@ -54,6 +54,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
 
+	// start the cleanup
+	ratelimiter.StartCleanup()
+	
 	// start service before shutdown to avoid race condition
 	wg.Add(1)
 	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"), &wg)

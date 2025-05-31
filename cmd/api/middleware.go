@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 
@@ -24,8 +25,11 @@ const (
 func (app *application) RatelimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.RateLimit.Enabled {
-			if allow, delay := app.ratelimiter.Allow(r.RemoteAddr); !allow {
-				writeErrJSON(w, http.StatusTooManyRequests, delay.String())
+			// extract exactly the ip !! ignore the port
+			host, _, _ := net.SplitHostPort(r.RemoteAddr)
+			ip := host
+			if allow, delay := app.ratelimiter.Allow(ip); !allow {
+				writeErrJSON(w, http.StatusTooManyRequests, fmt.Sprintf("retry after: %s second", delay.String()))
 				return
 			}
 		}
