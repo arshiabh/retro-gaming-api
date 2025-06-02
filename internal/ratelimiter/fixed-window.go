@@ -1,6 +1,8 @@
 package ratelimiter
 
 import (
+	"context"
+	"log"
 	"sync"
 	"time"
 )
@@ -49,10 +51,17 @@ func (rl *FixedWindowLimiter) Allow(ip string) (bool, time.Duration) {
 
 }
 
-func (rl *FixedWindowLimiter) StartCleanup() {
-	go func() {
-		ticker := time.NewTicker(time.Minute * 1)
-		for range ticker.C {
+func (rl *FixedWindowLimiter) StartCleanup(ctx context.Context, wg *sync.WaitGroup, interval time.Duration) {
+	defer wg.Done()
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("closing rate limiter cleanup")
+			return
+		case <-ticker.C:
 			rl.Lock()
 			now := time.Now()
 			for ip, client := range rl.clients {
@@ -62,5 +71,6 @@ func (rl *FixedWindowLimiter) StartCleanup() {
 			}
 			rl.Unlock()
 		}
-	}()
+	}
+
 }

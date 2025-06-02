@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/arshiabh/retro-gaming-api/internal/auth"
 	"github.com/arshiabh/retro-gaming-api/internal/config"
@@ -55,8 +56,9 @@ func main() {
 	var wg sync.WaitGroup
 
 	// start the cleanup
-	ratelimiter.StartCleanup()
-	
+	wg.Add(1)
+	go ratelimiter.StartCleanup(ctx, &wg, time.Minute)
+
 	// start service before shutdown to avoid race condition
 	wg.Add(1)
 	go kafka.StartConsumer(ctx, kafka.CreateReader("user-signup-consumer", "user-signup"), &wg)
