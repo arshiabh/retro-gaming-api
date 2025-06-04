@@ -6,21 +6,28 @@ import (
 	"log"
 	"time"
 
+	"github.com/arshiabh/retro-gaming-api/internal/retry"
 	_ "github.com/lib/pq"
 )
 
 func New(addr string, maxIdleConns, maxOpenConns int) (*sql.DB, error) {
-	db, err := sql.Open("postgres", addr)
-	if err != nil {
-		return nil, err
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var db *sql.DB
+	retry.Retry(ctx, func() error {
+		var err error
+		db, err = sql.Open("postgres", addr)
+		if err != nil {
+			return err
+		}
+		return db.Ping()
+
+	}, retry.WithRetries(4))
 
 	db.SetMaxIdleConns(maxIdleConns)
 	db.SetMaxOpenConns(maxOpenConns)
 	db.SetConnMaxIdleTime(time.Minute * 15)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
 		return nil, err

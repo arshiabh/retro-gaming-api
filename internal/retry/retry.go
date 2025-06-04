@@ -19,13 +19,13 @@ func defaultConfig() *retryConfig {
 	}
 }
 
-func withRetries(n int) retryOption {
+func WithRetries(n int) retryOption {
 	return func(cfg *retryConfig) {
 		cfg.maxRetries = n
 	}
 }
 
-func withBackOff(interval time.Duration) retryOption {
+func WithBackOff(interval time.Duration) retryOption {
 	return func(cfg *retryConfig) {
 		cfg.backOff = interval
 	}
