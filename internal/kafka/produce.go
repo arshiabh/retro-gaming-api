@@ -3,14 +3,22 @@ package kafka
 import (
 	"context"
 	"strconv"
+	"time"
 
+	"github.com/arshiabh/retro-gaming-api/internal/retry"
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaProducer interface {
-	Produce(string, []byte, []byte) error
-	EnsureTopicExists(string) error
-	CreateReader(string, string) *kafka.Reader
+type KafkaProducer struct {
+	writer *kafka.Writer
+}
+
+func NewKafkaProducer(brooker []string, topic string) *KafkaProducer {
+	return &KafkaProducer{
+		writer: &kafka.Writer{
+			Addr: kafka.TCP(brooker...),
+		},
+	}
 }
 
 func (k *KafkaService) Produce(topic string, key, value []byte) error {
@@ -28,10 +36,19 @@ func (k *KafkaService) Produce(topic string, key, value []byte) error {
 
 // cannot directly create topic in kafka we sure here topic is existed(creating it)
 func (k *KafkaService) EnsureTopicExists(topic string) error {
-	conn, err := kafka.Dial("tcp", "kafka:9092")
-	if err != nil {
-		return err
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	var conn *kafka.Conn
+	retry.Retry(ctx, func() error {
+		var err error
+		conn, err = kafka.Dial("tcp", "kafka:9092")
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
 	defer conn.Close()
 
 	controller, err := conn.Controller()
