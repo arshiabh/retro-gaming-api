@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"sync"
 	"time"
@@ -10,31 +11,44 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-var (
-	Producermap = make(map[string]*kafka.Writer)
-	mu          sync.Mutex
-)
-
-
-func (k *KafkaService) Produce(topic string, key, value string) error {
-	mu.Lock()
-	writer, exists := Producermap[topic]
-	defer writer.Close()
+func (k *KafkaService) Produce(ctx context.Context, topic string, key, value string) error {
+	k.mu.Lock()
+	writer, exists := k.Producermap[topic]
 	if !exists {
 		writer = &kafka.Writer{
 			Addr:     kafka.TCP(k.Brokers...),
 			Topic:    topic,
 			Balancer: &kafka.LeastBytes{},
 		}
-		Producermap[topic] = writer
+		k.Producermap[topic] = writer
 	}
-	mu.Unlock()
+	k.mu.Unlock()
 
-	return writer.WriteMessages(context.Background(), kafka.Message{
+	return writer.WriteMessages(ctx, kafka.Message{
 		Key:   []byte(key),
 		Value: []byte(value),
 		Time:  time.Now(),
 	})
+}
+
+func SendAsync(wg *sync.WaitGroup, topic, key, value string, sender *KafkaService) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+		defer cancel()
+		sender.Produce(ctx, topic, key, value)
+	}()
+}
+
+func (k *KafkaService) Close() {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	for topic, writer := range k.Producermap {
+		if err := writer.Close(); err != nil {
+			log.Printf("Error closing writer for topic %s: %v", topic, err)
+		}
+	}
 }
 
 // cannot directly create topic in kafka we sure here topic is existed(creating it)

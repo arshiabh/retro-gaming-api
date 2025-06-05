@@ -7,10 +7,10 @@ import (
 
 type GameService struct {
 	store *store.Storage
-	kafka kafka.KafkaProducer
+	kafka *kafka.KafkaService
 }
 
-func NewGameService(store *store.Storage, kafka kafka.KafkaProducer) *GameService {
+func NewGameService(store *store.Storage, kafka *kafka.KafkaService) *GameService {
 	return &GameService{
 		store: store,
 		kafka: kafka,

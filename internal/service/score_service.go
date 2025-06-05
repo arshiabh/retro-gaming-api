@@ -8,11 +8,11 @@ import (
 )
 
 type ScoreService struct {
-	kafka kafka.KafkaProducer
+	kafka *kafka.KafkaService
 	store *store.Storage
 }
 
-func NewScoreService(store *store.Storage, kafka kafka.KafkaProducer) *ScoreService {
+func NewScoreService(store *store.Storage, kafka *kafka.KafkaService) *ScoreService {
 	return &ScoreService{
 		store: store,
 		kafka: kafka,

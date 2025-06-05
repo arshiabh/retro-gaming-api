@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
@@ -42,11 +43,9 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 	if err := s.kafka.EnsureTopicExists("user-signup"); err != nil {
 		return nil, err
 	}
-	if err := s.kafka.Produce("user-signup",
-		fmt.Sprintf("%d", user.ID),
-		fmt.Sprintf(`{"event":"user-signup", "user_id":%d, "username":%v }`, user.ID, user.Username)); err != nil {
-		return nil, err
-	}
+
+	kafka.SendAsync(&sync.WaitGroup{}, "user-signup", fmt.Sprintf("%d", user.ID), "User Created", s.kafka)
+
 	return user, nil
 }
 

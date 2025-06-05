@@ -72,6 +72,7 @@ func main() {
 		//stop kafka
 		cancel()
 		wg.Wait()
+		kafka.Close()
 	}()
 
 	if err := app.run(ctx, mux); err != nil {
