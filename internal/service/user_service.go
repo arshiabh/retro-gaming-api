@@ -14,13 +14,15 @@ type UserService struct {
 	store *store.Storage
 	kafka *kafka.KafkaService
 	rdb   *cache.Storage
+	wg    *sync.WaitGroup
 }
 
-func NewUserService(store *store.Storage, kafka *kafka.KafkaService, rdb *cache.Storage) *UserService {
+func NewUserService(store *store.Storage, kafka *kafka.KafkaService, rdb *cache.Storage, wg *sync.WaitGroup) *UserService {
 	return &UserService{
 		store: store,
 		kafka: kafka,
 		rdb:   rdb,
+		wg:    wg,
 	}
 }
 
@@ -44,7 +46,7 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 		return nil, err
 	}
 
-	kafka.SendAsync(&sync.WaitGroup{}, "user-signup", fmt.Sprintf("%d", user.ID), "User Created", s.kafka)
+	kafka.SendAsync(s.wg, "user-signup", fmt.Sprintf("%d", user.ID), "User Created", s.kafka)
 
 	return user, nil
 }

@@ -35,9 +35,12 @@ func SendAsync(wg *sync.WaitGroup, topic, key, value string, sender *KafkaServic
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
-		sender.Produce(ctx, topic, key, value)
+		if err := sender.Produce(ctx, topic, key, value); err != nil {
+			log.Println(err)
+		}
 	}()
 }
 

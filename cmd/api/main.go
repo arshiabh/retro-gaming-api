@@ -28,12 +28,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// for producer
+	var pwg *sync.WaitGroup
+
 	auth := auth.NewAuthentication(os.Getenv("secret_key"))
 	kafka := kafka.NewKafkaService([]string{cfg.KafkaAddr})
 	store := store.NewStorage(db)
 	rdb := cache.NewStorage(cache.NewRedisClient("redis:6379"))
 
-	service := service.NewService(store, kafka, rdb)
+	service := service.NewService(store, kafka, rdb, pwg)
 
 	errorLogger := log.New(os.Stdout, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger := log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -70,9 +73,11 @@ func main() {
 		signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		<-c
 		//stop kafka
+		pwg.Wait()
+		kafka.Close()
+
 		cancel()
 		wg.Wait()
-		kafka.Close()
 	}()
 
 	if err := app.run(ctx, mux); err != nil {
