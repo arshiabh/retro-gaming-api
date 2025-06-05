@@ -12,7 +12,7 @@ type Service struct {
 	ScoreService *ScoreService
 }
 
-func NewService(store *store.Storage, kafka kafka.KafkaProducer, rdb *cache.Storage) *Service {
+func NewService(store *store.Storage, kafka *kafka.KafkaService, rdb *cache.Storage) *Service {
 	return &Service{
 		UserService:  NewUserService(store, kafka, rdb),
 		GameService:  NewGameService(store, kafka),

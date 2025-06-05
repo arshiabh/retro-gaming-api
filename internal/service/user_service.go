@@ -11,11 +11,11 @@ import (
 
 type UserService struct {
 	store *store.Storage
-	kafka kafka.KafkaProducer
+	kafka *kafka.KafkaService
 	rdb   *cache.Storage
 }
 
-func NewUserService(store *store.Storage, kafka kafka.KafkaProducer, rdb *cache.Storage) *UserService {
+func NewUserService(store *store.Storage, kafka *kafka.KafkaService, rdb *cache.Storage) *UserService {
 	return &UserService{
 		store: store,
 		kafka: kafka,
@@ -43,8 +43,8 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 		return nil, err
 	}
 	if err := s.kafka.Produce("user-signup",
-		fmt.Appendf(nil, "%d", user.ID),
-		fmt.Appendf(nil, `{"event":"user-signup", "user_id":%d, "username":%v }`, user.ID, user.Username)); err != nil {
+		fmt.Sprintf("%d", user.ID),
+		fmt.Sprintf(`{"event":"user-signup", "user_id":%d, "username":%v }`, user.ID, user.Username)); err != nil {
 		return nil, err
 	}
 	return user, nil

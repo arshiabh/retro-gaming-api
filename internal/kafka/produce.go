@@ -3,34 +3,37 @@ package kafka
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/arshiabh/retro-gaming-api/internal/retry"
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaProducer struct {
-	writer *kafka.Writer
-}
+var (
+	Producermap = make(map[string]*kafka.Writer)
+	mu          sync.Mutex
+)
 
-func NewKafkaProducer(brooker []string, topic string) *KafkaProducer {
-	return &KafkaProducer{
-		writer: &kafka.Writer{
-			Addr: kafka.TCP(brooker...),
-		},
-	}
-}
 
-func (k *KafkaService) Produce(topic string, key, value []byte) error {
-	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers: k.Brokers,
-		Topic:   topic,
-	})
+func (k *KafkaService) Produce(topic string, key, value string) error {
+	mu.Lock()
+	writer, exists := Producermap[topic]
 	defer writer.Close()
+	if !exists {
+		writer = &kafka.Writer{
+			Addr:     kafka.TCP(k.Brokers...),
+			Topic:    topic,
+			Balancer: &kafka.LeastBytes{},
+		}
+		Producermap[topic] = writer
+	}
+	mu.Unlock()
 
 	return writer.WriteMessages(context.Background(), kafka.Message{
-		Key:   key,
-		Value: value,
+		Key:   []byte(key),
+		Value: []byte(value),
+		Time:  time.Now(),
 	})
 }
 
