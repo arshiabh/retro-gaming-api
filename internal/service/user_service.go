@@ -1,9 +1,13 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"sync"
+	"time"
 
+	"github.com/arshiabh/retro-gaming-api/internal/events"
 	"github.com/arshiabh/retro-gaming-api/internal/kafka"
 	"github.com/arshiabh/retro-gaming-api/internal/store"
 	"github.com/arshiabh/retro-gaming-api/internal/store/cache"
@@ -46,7 +50,18 @@ func (s *UserService) CreateUser(username, password string) (*store.User, error)
 		return nil, err
 	}
 
-	kafka.SendAsync(s.wg, "user-signup", fmt.Sprintf("%d", user.ID), "User Created", s.kafka)
+	event := &events.SignedUpEvent{
+		EventType: "User Created",
+		UserID:    strconv.FormatInt(user.ID, 10),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+	}
+
+	marshalEvent, err := json.Marshal(event)
+	if err != nil {
+		return nil, err
+	}
+
+	kafka.SendAsync(s.wg, "user-signup", fmt.Sprintf("%d", user.ID), marshalEvent, s.kafka)
 
 	return user, nil
 }

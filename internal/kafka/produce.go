@@ -11,7 +11,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func (k *KafkaService) Produce(ctx context.Context, topic string, key, value string) error {
+func (k *KafkaService) Produce(ctx context.Context, topic string, key string, value []byte) error {
 	k.mu.Lock()
 	writer, exists := k.Producermap[topic]
 	if !exists {
@@ -26,12 +26,12 @@ func (k *KafkaService) Produce(ctx context.Context, topic string, key, value str
 
 	return writer.WriteMessages(ctx, kafka.Message{
 		Key:   []byte(key),
-		Value: []byte(value),
+		Value: value,
 		Time:  time.Now(),
 	})
 }
 
-func SendAsync(wg *sync.WaitGroup, topic, key, value string, sender *KafkaService) {
+func SendAsync(wg *sync.WaitGroup, topic, key string, value []byte, sender *KafkaService) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
