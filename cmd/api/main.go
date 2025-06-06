@@ -29,14 +29,15 @@ func main() {
 	}
 
 	// for producer
-	var pwg *sync.WaitGroup
+	var pwg sync.WaitGroup
 
 	auth := auth.NewAuthentication(os.Getenv("secret_key"))
+	log.Println(cfg.KafkaAddr)
 	kafka := kafka.NewKafkaService([]string{cfg.KafkaAddr})
 	store := store.NewStorage(db)
-	rdb := cache.NewStorage(cache.NewRedisClient("redis:6379"))
+	rdb := cache.NewStorage(cache.NewRedisClient("localhost:6380"))
 
-	service := service.NewService(store, kafka, rdb, pwg)
+	service := service.NewService(store, kafka, rdb, &pwg)
 
 	errorLogger := log.New(os.Stdout, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger := log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)

@@ -35,7 +35,7 @@ func SendAsync(wg *sync.WaitGroup, topic, key, value string, sender *KafkaServic
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		
+
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 		if err := sender.Produce(ctx, topic, key, value); err != nil {
@@ -62,7 +62,7 @@ func (k *KafkaService) EnsureTopicExists(topic string) error {
 	var conn *kafka.Conn
 	retry.Retry(ctx, func() error {
 		var err error
-		conn, err = kafka.Dial("tcp", "kafka:9092")
+		conn, err = kafka.Dial("tcp", "localhost:9092")
 		if err != nil {
 			return err
 		}
