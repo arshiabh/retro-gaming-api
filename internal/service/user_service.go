@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -73,6 +74,13 @@ func (s *UserService) LoginUser(username string, password string) (*store.User, 
 	}
 
 	if err := utils.CheckPasswordHash(user.Password, password); err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	if err := s.rdb.User.Set(ctx, user); err != nil {
 		return nil, err
 	}
 

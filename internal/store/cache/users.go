@@ -13,6 +13,7 @@ import (
 
 type UserStore interface {
 	Get(context.Context, int64) (*store.User, error)
+	Set(context.Context, *store.User) error
 }
 
 type RedisUserStore struct {

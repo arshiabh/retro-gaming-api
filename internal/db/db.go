@@ -36,3 +36,18 @@ func New(addr string, maxIdleConns, maxOpenConns int) (*sql.DB, error) {
 
 	return db, nil
 }
+
+func WithTx(db *sql.DB, operation func(tx *sql.Tx) error) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	err = operation(tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
